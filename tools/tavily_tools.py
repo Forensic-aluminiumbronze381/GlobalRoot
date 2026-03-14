@@ -2,7 +2,11 @@
 Tavily Tools — Real-time web research, page reading, deep research, and crawling
 """
 import requests
-from tavily import TavilyClient
+
+try:
+    from tavily import TavilyClient
+except Exception:
+    TavilyClient = None
 
 from config import TAVILY_API_KEY, TAVILY_BASE_URL, TAVILY_TIMEOUT
 
@@ -108,6 +112,12 @@ def deep_research(query: str) -> str:
     if not TAVILY_API_KEY:
         return "❌ TAVILY_API_KEY is not set."
 
+    if TavilyClient is None:
+        return (
+            "❌ Tavily SDK is not installed.\n"
+            "Install it with: pip install tavily-python"
+        )
+
     try:
         client = TavilyClient(api_key=TAVILY_API_KEY)
         response = client.search(
@@ -157,6 +167,12 @@ def crawl_page(url: str) -> str:
 
     if not TAVILY_API_KEY:
         return "❌ TAVILY_API_KEY is not set."
+
+    if TavilyClient is None:
+        return (
+            "❌ Tavily SDK is not installed.\n"
+            "Install it with: pip install tavily-python"
+        )
 
     try:
         client = TavilyClient(api_key=TAVILY_API_KEY)

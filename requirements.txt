@@ -2,3 +2,4 @@ requests
 chromadb
 python-dotenv
 pyTelegramBotAPI
+tavily-python
