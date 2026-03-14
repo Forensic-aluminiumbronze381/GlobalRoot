@@ -121,6 +121,30 @@ def prompt_platform_target() -> str:
         print("Invalid choice. Please enter 1 or 2.")
 
 
+def prompt_markdown_mode() -> str:
+    print("\nChoose markdown memory file mode:")
+    print("1) Auto-generate SOUL.md and USER.md from your installer answers (recommended)")
+    print("2) Use developer templates (SOUL.template.md / USER.template.md / SKILL.template.md)")
+    print("3) Keep existing SOUL.md / USER.md / SKILL.md files (manual/custom)")
+
+    while True:
+        ans = input("Enter 1, 2, or 3 [1]: ").strip()
+        if ans in ("", "1"):
+            return "auto"
+        if ans == "2":
+            return "template"
+        if ans == "3":
+            return "manual"
+        print("Invalid choice. Please enter 1, 2, or 3.")
+
+
+def _render_template(template_text: str, mapping: dict[str, str]) -> str:
+    content = template_text
+    for key, value in mapping.items():
+        content = content.replace(f"{{{{{key}}}}}", value)
+    return content
+
+
 def default_allowed_dirs_for_platform(platform_target: str) -> list[str]:
     if platform_target == "windows":
         home = Path.home()
@@ -178,6 +202,7 @@ platform_target = prompt_platform_target()
 model = prompt("Ollama Model to use", recommended_model)
 user_name = prompt("Your Name / User Name", "User")
 assistant_name = prompt("Assistant Name", "Root")
+markdown_mode = prompt_markdown_mode()
 
 print("\n--- Agent Configuration ---")
 agent_persona = prompt_multiline(f"How should {assistant_name} behave and speak? (e.g. 'Highly professional, concise, slightly sarcastic. Speaks entirely in English.')")
@@ -342,6 +367,42 @@ with open(BASE_DIR / "prompts.py", "w", encoding="utf-8") as f:
     f.write(f'LANGUAGE_REMINDER = """{lang_reminder}"""\n\n')
     f.write(f'SYSTEM_GREETING = "{sys_greeting}"\n')
 
+template_mapping = {
+    "USER_NAME": user_name,
+    "ASSISTANT_NAME": assistant_name,
+    "PERSONA": agent_persona,
+    "EMOTIONS": agent_emotions,
+    "DIRECTIVE": agent_directive,
+    "SYSTEM_SETUP": "Windows" if platform_target == "windows" else "Linux",
+}
+
+applied_templates = set()
+
+if markdown_mode == "template":
+    print("Applying developer markdown templates...")
+    template_pairs = [
+        ("SOUL.template.md", "SOUL.md"),
+        ("USER.template.md", "USER.md"),
+        ("SKILL.template.md", "SKILL.md"),
+    ]
+    missing_templates = []
+    for src_name, dst_name in template_pairs:
+        src_path = BASE_DIR / src_name
+        dst_path = BASE_DIR / dst_name
+        if not src_path.exists():
+            missing_templates.append(src_name)
+            continue
+        src_text = src_path.read_text(encoding="utf-8")
+        rendered = _render_template(src_text, template_mapping)
+        dst_path.write_text(rendered, encoding="utf-8")
+        applied_templates.add(dst_name)
+
+    if missing_templates:
+        print("Warning: Some template files were not found:")
+        for name in missing_templates:
+            print(f"  - {name}")
+        print("Falling back to auto-generated markdown files for missing templates.")
+
 soul_content = f"""# SOUL.md - {assistant_name}'s Core Identity & Constitution
 
 
@@ -385,8 +446,8 @@ I state my intent to use a tool, then WAIT for the real output. I NEVER invent r
 {agent_directive}
 """
 
-with open(BASE_DIR / "SOUL.md", "w", encoding="utf-8") as f:
-    f.write(soul_content)
+if markdown_mode == "auto" or (markdown_mode == "template" and "SOUL.md" not in applied_templates):
+    (BASE_DIR / "SOUL.md").write_text(soul_content, encoding="utf-8")
 
 user_content = f"""# USER.md - Information about {user_name}
 
@@ -416,8 +477,76 @@ Errors and repeating instructions.
 Empty for now. Run tools to expand.
 """
 
-with open(BASE_DIR / "USER.md", "w", encoding="utf-8") as f:
-    f.write(user_content)
+if markdown_mode == "auto" or (markdown_mode == "template" and "USER.md" not in applied_templates):
+    (BASE_DIR / "USER.md").write_text(user_content, encoding="utf-8")
+
+if markdown_mode == "manual":
+    print("Keeping existing SOUL.md / USER.md / SKILL.md unchanged (manual/custom mode).")
+
+print("\nVerifying markdown memory files...")
+
+skill_template_path = BASE_DIR / "SKILL.template.md"
+if skill_template_path.exists():
+    skill_content = _render_template(skill_template_path.read_text(encoding="utf-8"), template_mapping)
+else:
+    skill_content = """# SKILL.md — Agent Tool & Capability Reference
+
+This file defines what the assistant can do in real execution.
+
+## Core Principle
+
+I can actually execute tools.
+I must never claim I am text-only.
+I never fabricate command output or web/file results.
+
+## 1 BASH
+
+Action: `bash`
+
+## 2 FILE OPERATIONS
+
+Actions: `read_file`, `write_file`
+
+## 3 MEMORY OPERATIONS
+
+Actions: `memory_read`, `memory_append`, `memory_edit`, `memory_delete`, `memory_update`
+
+## 4 APP AND IDE LAUNCH
+
+Actions: `open_app`, `vscode_open_project`, `youtube_search_play`
+
+## 5 WORKSPACE AND WINDOW CONTROL
+
+Actions: `switch_workspace`, `read_active_workspace`, `list_open_windows`, `move_window_workspace`, `open_app_workspace`
+
+## 6 WEB RESEARCH
+
+Actions: `web_research`, `read_page`, `deep_research`, `crawl_page`
+
+## 7 TELEGRAM REMOTE CONTROLS
+
+Commands: `/start`, `/reset`, `/stop`, `/next`, `/previous`, `/volumeup`, `/volumedown`, `/volumemute`, `/ss`
+
+## 8 RESPONSE POLICY
+
+When tools are needed, emit action JSON, wait for execution, then report actual results.
+When not needed, return `{"action": "none"}`.
+"""
+
+required_markdown = {
+    "SOUL.md": soul_content,
+    "USER.md": user_content,
+    "SKILL.md": skill_content,
+}
+
+for file_name, fallback_content in required_markdown.items():
+    target = BASE_DIR / file_name
+    if target.exists():
+        existing = target.read_text(encoding="utf-8").strip()
+        if existing:
+            continue
+    target.write_text(fallback_content, encoding="utf-8")
+    print(f"Created fallback markdown file: {file_name}")
 
 print("\nRequirements Check...")
 if not (BASE_DIR / ".venv").exists():

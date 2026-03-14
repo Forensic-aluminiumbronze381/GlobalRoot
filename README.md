@@ -61,7 +61,17 @@ This repository contains a highly customizable, **consciousness-first, dual-pass
    - **Agent Emotions:** What does it feel? Does it panic? Is it purely logical?
    - **Absolute Directive:** What is its ultimate goal it must never break?
    
-   *This process automatically builds the `.env` file, tailored JSON prompts (`prompts.py`), and the foundational `SOUL.md` & `USER.md` core files without exposing them to Git.*
+  *This process automatically builds the `.env` file, tailored JSON prompts (`prompts.py`), and the foundational memory files.*
+
+### Markdown File Modes (SOUL / USER / SKILL)
+
+During installation, you can choose one of three modes:
+
+- **Auto-generate (default):** Builds `SOUL.md` and `USER.md` from your installer answers.
+- **Developer templates:** Uses `SOUL.template.md`, `USER.template.md`, and `SKILL.template.md`.
+- **Manual/custom:** Keeps your existing markdown files untouched.
+
+No matter which mode you choose, installer integrity checks ensure `SOUL.md`, `USER.md`, and `SKILL.md` exist after setup (fallback files are created if missing).
 
 5. **Start the Agent (Terminal Mode):**
    ```bash
