@@ -470,6 +470,7 @@ def main():
         ss_path = str(Path(tempfile.gettempdir()) / "root_vision.png")
 
         if os.name == "nt":
+            escaped_ss_path = ss_path.replace("'", "''")
             ps_script = (
                 "Add-Type -AssemblyName System.Windows.Forms;"
                 "Add-Type -AssemblyName System.Drawing;"
@@ -477,7 +478,7 @@ def main():
                 "$bmp = New-Object System.Drawing.Bitmap($bounds.Width, $bounds.Height);"
                 "$g = [System.Drawing.Graphics]::FromImage($bmp);"
                 "$g.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size);"
-                f"$bmp.Save('{ss_path.replace("'", "''")}');"
+                f"$bmp.Save('{escaped_ss_path}');"
                 "$g.Dispose();"
                 "$bmp.Dispose();"
             )
