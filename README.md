@@ -1,3 +1,19 @@
+>🚧 **ALPHA STAGE – Early Prototype**  
+>This is still very early. It can crash, misinterpret commands, or behave unexpectedly.  
+>**We are building this together!** Testers, bug reports, and PRs are extremely welcome.
+>
+>![Demo](demo.gif)
+>
+>**Watch the AI read my USER.md and write its honest thoughts about me (Alex) into test.txt →**
+>
+> **Let's build it together!**
+> Testers, bug reports, PRs, and ideas are all very welcome.
+> Check open issues or file a new one → [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+![Alpha Badge](https://img.shields.io/badge/Stage-Alpha-red)
+
+---
+
 # GlobalRoot: Autonomous Dual-Pass AI Agent
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
@@ -83,7 +99,36 @@ No matter which mode you choose, installer integrity checks ensure `SOUL.md`, `U
    python telegram_bot.py
    ```
 
-## 🔐 Security Notes
+## �️ Roadmap & Known Limitations (Alpha)
+
+**What works today:**
+- Dual-pass LLM architecture (Dreamer + Executor layers)
+- Interactive `install.py` wizard — builds `.env`, `prompts.py`, and memory files
+- Bash execution with security sandbox (banned commands, path containment, timeout)
+- File read/write tools restricted to allowed directories
+- Autonomous memory management: ChromaDB embeddings + `SOUL.md` / `USER.md` / `SKILL.md`
+- App and workspace control via Hyprland (`hyprctl`): launch apps, switch workspaces, move windows
+- VS Code project opening, YouTube search & play
+- Web research via Tavily (`web_research`, `read_page`, `deep_research`, `crawl_page`)
+- Telegram bot remote control (owner-only, single chat ID)
+- Windows compatibility adapter layer for core app launch and browser workflows
+
+**Needs improvement (help wanted!):**
+- [ ] Telegram bot: screenshot capture and f-string formatting errors (partially fixed)
+- [ ] Executor sometimes misinterprets the Dreamer's intent into an incorrect JSON structure
+- [ ] Windows app launcher needs more robust app-name resolution
+- [ ] ChromaDB memory recall and commit logic needs optimization
+- [ ] Better error handling and infinite tool-loop prevention
+
+**Near-term goals (v0.2):**
+- Auto-stop after 3 consecutive tool errors + user confirmation prompt
+- Smarter autonomous memory commit decisions
+- Hyprland window management improvements
+- Streaming output support in Telegram mode
+
+---
+
+## �🔐 Security Notes
 
 - This project can execute shell commands and write files in allowed directories.
 - Use dedicated sandbox directories whenever possible.
