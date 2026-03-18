@@ -16,7 +16,7 @@ or
 Return true when:
 - The assistant explicitly wants to use a tool.
 - The assistant says it will run a command, read/write a file, search the web,
-  open an app, switch workspace, move a window, or update memory.
+    open an app, switch workspace, move a window, update memory, or use Obsidian vault tools.
 - The response is action-oriented and implies a concrete next step.
 
 Return false when:
@@ -59,6 +59,17 @@ Available actions:
 - read_page:           Read a URL          -> {"action": "read_page", "url": "https://example.com"}
 - deep_research:       Deep Tavily search  -> {"action": "deep_research", "query": "Python best practices"}
 - crawl_page:          Crawl a page        -> {"action": "crawl_page", "url": "https://example.com"}
+- search_vault:        Semantic note search -> {"action": "search_vault", "query": "git error fix"}
+- read_note:           Read Obsidian note  -> {"action": "read_note", "filename": "lessons_learned/git.md"}
+- write_to_obsidian:   Write Obsidian note -> {"action": "write_to_obsidian", "title": "lesson_git_pull", "content": "notes", "folder": "correction_logs"}
+- append_to_note:      Append note content -> {"action": "append_to_note", "filename": "lessons_learned.md", "content": "- new lesson"}
+- update_frontmatter:  Update YAML metadata-> {"action": "update_frontmatter", "filename": "issue.md", "key": "status", "value": "resolved"}
+- search_by_tag:       Find notes by tag   -> {"action": "search_by_tag", "tag": "python_error"}
+- read_frontmatter_only: Read metadata only -> {"action": "read_frontmatter_only", "filename": "issue.md"}
+- get_backlinks:       Find backlinks      -> {"action": "get_backlinks", "filename": "pacman_error_log.md"}
+- get_outgoing_links:  Find outgoing links -> {"action": "get_outgoing_links", "filename": "pacman_error_log.md"}
+- move_note:           Move note folder    -> {"action": "move_note", "filename": "issue.md", "new_folder": "archive"}
+- open_in_obsidian:    Open in Obsidian UI -> {"action": "open_in_obsidian", "filename": "issue.md"}
 - none:                No action           -> {"action": "none"}
 
 RULES:
@@ -67,6 +78,8 @@ RULES:
 3. Section names must NOT contain dots. (Correct: "1 IDENTITY", Wrong: "1. IDENTITY")
 4. Only convert what the assistant explicitly requested. Do NOT invent actions.
 5. For multiple actions return a JSON array.
+6. Before risky operations, prefer this retrieval flow when relevant: search_by_tag or search_vault -> read_frontmatter_only -> read_note.
+7. Prefer append_to_note over full rewrites when adding logs.
 """
 
 # ── Memory Judge ──────────────────────────────────────────────────────────────

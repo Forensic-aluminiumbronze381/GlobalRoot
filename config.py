@@ -80,3 +80,13 @@ OWNER_CHAT_ID = int(os.environ.get("OWNER_CHAT_ID", "0"))
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY", "")
 TAVILY_BASE_URL = os.environ.get("TAVILY_BASE_URL", "https://api.tavily.com")
 TAVILY_TIMEOUT = int(os.environ.get("TAVILY_TIMEOUT", "20"))
+
+# Obsidian + RAG settings
+OBSIDIAN_VAULT_DIR = os.environ.get("OBSIDIAN_VAULT_DIR", str(Path.home() / "Obsidian"))
+OBSIDIAN_EMBED_MODEL = os.environ.get("OBSIDIAN_EMBED_MODEL", "nomic-embed-text")
+OBSIDIAN_RAG_COLLECTION = os.environ.get("OBSIDIAN_RAG_COLLECTION", "obsidian_notes")
+OBSIDIAN_RAG_TOP_K = int(os.environ.get("OBSIDIAN_RAG_TOP_K", "4"))
+OBSIDIAN_RAG_MAX_CONTEXT_CHARS = int(os.environ.get("OBSIDIAN_RAG_MAX_CONTEXT_CHARS", "4000"))
+OBSIDIAN_CHUNK_SIZE = int(os.environ.get("OBSIDIAN_CHUNK_SIZE", "900"))
+OBSIDIAN_CHUNK_OVERLAP = int(os.environ.get("OBSIDIAN_CHUNK_OVERLAP", "120"))
+OBSIDIAN_CORRECTIONS_DIR = os.environ.get("OBSIDIAN_CORRECTIONS_DIR", "correction_logs")

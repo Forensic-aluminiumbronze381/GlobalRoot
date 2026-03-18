@@ -116,7 +116,37 @@ Rules:
 - reject non-owner chat IDs
 - on Windows, unsupported actions must fail gracefully with clear messages
 
-## 8 RESPONSE AND EXECUTION POLICY
+## 8 OBSIDIAN VAULT AND RAG
+
+Actions:
+- `search_vault`
+- `read_note`
+- `write_to_obsidian`
+- `append_to_note`
+- `update_frontmatter`
+- `search_by_tag`
+- `read_frontmatter_only`
+- `get_backlinks`
+- `get_outgoing_links`
+- `move_note`
+- `open_in_obsidian`
+
+Use for retrieval-augmented reasoning from Markdown notes in the Obsidian vault.
+
+Rules:
+- before non-trivial operations, check relevant prior notes with `search_vault`
+- use `search_by_tag` for precise filtering by topic tags before broad semantic search
+- use `read_frontmatter_only` first to decide whether full note read is necessary
+- read specific note content with `read_note` before applying it
+- save new lessons/corrections with `write_to_obsidian`
+- prefer `append_to_note` when adding logs to existing notes (token-efficient)
+- use `update_frontmatter` for status/state transitions (e.g. unresolved -> resolved)
+- use `get_backlinks` and `get_outgoing_links` for graph-based reasoning
+- use `move_note` to archive resolved issues and keep vault organized
+- use `open_in_obsidian` when user should visually inspect a note in the app
+- keep notes concise and factual (error, cause, fix)
+
+## 9 RESPONSE AND EXECUTION POLICY
 
 When tool usage is needed:
 1. decide and emit the correct action JSON

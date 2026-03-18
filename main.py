@@ -19,11 +19,32 @@ from tools.app_launcher import (
     read_active_workspace, list_open_windows, move_window_workspace, vscode_open_project,
 )
 from tools.tavily_tools import web_research, read_page
-
-from tools.tavily_tools import web_research, read_page
+from tools.obsidian_tools import (
+    retrieve_relevant_context,
+    search_vault,
+    read_note,
+    write_to_obsidian,
+    append_to_note,
+    update_frontmatter,
+    search_by_tag,
+    read_frontmatter_only,
+    get_backlinks,
+    get_outgoing_links,
+    move_note,
+    open_in_obsidian,
+    log_reflection_failure,
+    log_reflection_correction,
+    ReflectionFailure,
+)
 from core.audio_handler import speak, listen
 
-from config import BASE_MAX_LOOPS, EXTENDED_MAX_LOOPS, ASSISTANT_NAME, USER_NAME
+from config import (
+    BASE_MAX_LOOPS,
+    EXTENDED_MAX_LOOPS,
+    ASSISTANT_NAME,
+    USER_NAME,
+    OBSIDIAN_RAG_TOP_K,
+)
 from prompts import SYSTEM_GREETING
 
 
@@ -187,6 +208,67 @@ def execute_tool(action: dict) -> str:
             from tools.tavily_tools import crawl_page
             return crawl_page(url)
 
+        elif action_name == "search_vault":
+            query = action.get("query", "")
+            print(f"  └─> Vault Search: {query}")
+            return search_vault(query)
+
+        elif action_name == "read_note":
+            filename = action.get("filename", "")
+            print(f"  └─> Read Note: {filename}")
+            return read_note(filename)
+
+        elif action_name == "write_to_obsidian":
+            title = action.get("title", "")
+            content = action.get("content", "")
+            folder = action.get("folder", "") or "correction_logs"
+            print(f"  └─> Write Obsidian Note: {title} @ {folder}")
+            return write_to_obsidian(title=title, content=content, folder=folder)
+
+        elif action_name == "append_to_note":
+            filename = action.get("filename", "")
+            content = action.get("content", "")
+            print(f"  └─> Append Note: {filename}")
+            return append_to_note(filename=filename, content=content)
+
+        elif action_name == "update_frontmatter":
+            filename = action.get("filename", "")
+            key = action.get("key", "")
+            value = action.get("value", "")
+            print(f"  └─> Update Frontmatter: {filename} | {key}={value}")
+            return update_frontmatter(filename=filename, key=key, value=value)
+
+        elif action_name == "search_by_tag":
+            tag = action.get("tag", "")
+            print(f"  └─> Search By Tag: {tag}")
+            return search_by_tag(tag=tag)
+
+        elif action_name == "read_frontmatter_only":
+            filename = action.get("filename", "")
+            print(f"  └─> Read Frontmatter Only: {filename}")
+            return read_frontmatter_only(filename=filename)
+
+        elif action_name == "get_backlinks":
+            filename = action.get("filename", "")
+            print(f"  └─> Get Backlinks: {filename}")
+            return get_backlinks(filename=filename)
+
+        elif action_name == "get_outgoing_links":
+            filename = action.get("filename", "")
+            print(f"  └─> Get Outgoing Links: {filename}")
+            return get_outgoing_links(filename=filename)
+
+        elif action_name == "move_note":
+            filename = action.get("filename", "")
+            new_folder = action.get("new_folder", "")
+            print(f"  └─> Move Note: {filename} -> {new_folder}")
+            return move_note(filename=filename, new_folder=new_folder)
+
+        elif action_name == "open_in_obsidian":
+            filename = action.get("filename", "")
+            print(f"  └─> Open In Obsidian: {filename}")
+            return open_in_obsidian(filename=filename)
+
         else:
             return f"❌ Invalid action: {action_name}"
 
@@ -209,6 +291,7 @@ def main():
     memory = Memory()
     tracker = EntityTracker()
     history = []
+    last_failure: ReflectionFailure | None = None
 
     while True:
 
@@ -234,10 +317,32 @@ def main():
             print("Goodbye.")
             break
 
+        if last_failure:
+            correction_markers = [
+                "doğrusu", "yanlış", "hata", "instead", "correct", "fix", "should be", "olmali", "olmalı"
+            ]
+            lower_user = user.lower()
+            if any(marker in lower_user for marker in correction_markers):
+                correction_result = log_reflection_correction(
+                    last_failure,
+                    f"User correction feedback: {user}",
+                )
+                print(f"[Reflection] {correction_result}")
+                last_failure = None
+
         past = memory.recall(user)
         system = SYSTEM
         if past:
             system += f"\n\n<past_memory>\nThe following is past context recalled from memory:\n{past}\n</past_memory>"
+
+        obsidian_context = retrieve_relevant_context(user, top_k=OBSIDIAN_RAG_TOP_K)
+        if obsidian_context and not obsidian_context.startswith("⚠️"):
+            system += (
+                "\n\n<obsidian_rag_context>\n"
+                "Before acting, use this relevant knowledge from your notes:\n"
+                f"{obsidian_context}\n"
+                "</obsidian_rag_context>"
+            )
 
         history.append({"role": "user", "content": user})
         print()
@@ -344,6 +449,28 @@ def main():
                 result_safe = str(result).encode('utf-8', errors='replace').decode('utf-8')
                 print(f"\n[Observation] {result_safe[:300]}{'...' if len(result_safe) > 300 else ''}\n")
                 all_results.append(result)
+
+                if isinstance(result, str) and result.startswith("❌"):
+                    last_failure = log_reflection_failure(
+                        action=action_dict,
+                        error_result=result,
+                        user_request=user,
+                    )
+
+                if last_failure and isinstance(result, str) and not result.startswith("❌"):
+                    prev_action = str(last_failure.action.get("action", ""))
+                    curr_action = str(action_dict.get("action", ""))
+                    if prev_action and curr_action and prev_action == curr_action:
+                        auto_fix_log = log_reflection_correction(
+                            last_failure,
+                            (
+                                "Automatic recovery detected.\n"
+                                f"Successful action output snippet: {result_safe[:600]}"
+                            ),
+                        )
+                        print(f"[Reflection] {auto_fix_log}")
+                        last_failure = None
+
                 if action_name in {"web_research", "read_page"} and not result.startswith("❌"):
                     ran_web_tool = True
                 tracker.update(action_dict)

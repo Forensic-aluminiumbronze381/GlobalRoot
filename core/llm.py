@@ -301,7 +301,11 @@ def _parse_json_fallback(text: str) -> dict:
     if match:
         action = match.group(1)
         result = {"action": action}
-        for key in ["command", "file", "content", "section", "new_content", "old", "new", "to_delete", "app", "window", "workspace_no", "search_query", "query", "depth", "url"]:
+        for key in [
+            "command", "file", "content", "section", "new_content", "old", "new", "to_delete",
+            "app", "window", "workspace_no", "search_query", "query", "depth", "url",
+            "filename", "title", "folder", "key", "value", "tag", "new_folder"
+        ]:
             key_match = re.search(rf'"{key}"\s*:\s*"([^"]*)"', text)
             if key_match:
                 result[key] = key_match.group(1)
